@@ -112,9 +112,8 @@ export const MusicPlayer = () => {
       <div className="w-full max-w-2xl bg-card border border-border rounded-md shadow-sm p-4">
         <div className="space-y-3">
           {/* Track Info */}
-          <div className="text-sm text-foreground">
+          <div className="text-sm text-foreground text-center">
             <div className="font-medium">{track.title}</div>
-            <div className="text-muted-foreground text-xs">{track.artist}</div>
           </div>
 
           {/* Controls and Progress */}
