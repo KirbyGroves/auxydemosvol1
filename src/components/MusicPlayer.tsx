@@ -2,42 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Play, Pause, SkipBack, SkipForward } from "lucide-react";
-
-interface Track {
-  id: number;
-  title: string;
-  artist: string;
-  duration: number;
-  cover: string;
-  src: string;
-}
-
-const tracks: Track[] = [
-  {
-    id: 1,
-    title: "Summer Vibes",
-    artist: "The Melody Makers",
-    duration: 243,
-    cover: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=400&fit=crop",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
-  },
-  {
-    id: 2,
-    title: "Midnight Dreams",
-    artist: "Echo Wave",
-    duration: 198,
-    cover: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
-  },
-  {
-    id: 3,
-    title: "Ocean Breeze",
-    artist: "Coastal Harmony",
-    duration: 215,
-    cover: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&h=400&fit=crop",
-    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
-  }
-];
+import { tracks, getGoogleDriveStreamUrl } from "@/config/tracks";
 
 const formatTime = (seconds: number) => {
   const mins = Math.floor(seconds / 60);
@@ -106,6 +71,7 @@ export const MusicPlayer = () => {
   };
 
   const track = tracks[currentTrack];
+  const trackUrl = getGoogleDriveStreamUrl(track.googleDriveFileId);
 
   return (
     <div className="min-h-screen w-full bg-background flex items-center justify-center p-4">
@@ -178,7 +144,7 @@ export const MusicPlayer = () => {
         </div>
       </div>
 
-      <audio ref={audioRef} src={track.src} />
+      <audio ref={audioRef} src={trackUrl} />
     </div>
   );
 };
