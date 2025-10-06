@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Play, Pause, SkipBack, SkipForward } from "lucide-react";
-import { tracks, getGoogleDriveStreamUrl } from "@/config/tracks";
+import { GOOGLE_DRIVE_FOLDER_ID, Track, getGoogleDriveStreamUrl } from "@/config/tracks";
+import { supabase } from "@/integrations/supabase/client";
 
 const formatTime = (seconds: number) => {
   const mins = Math.floor(seconds / 60);
@@ -14,7 +15,41 @@ export const MusicPlayer = () => {
   const [currentTrack, setCurrentTrack] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
+  const [tracks, setTracks] = useState<Track[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Fetch tracks from Google Drive on component mount
+  useEffect(() => {
+    const fetchTracks = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const { data, error: functionError } = await supabase.functions.invoke('fetch-drive-tracks', {
+          body: { folderId: GOOGLE_DRIVE_FOLDER_ID }
+        });
+
+        if (functionError) {
+          throw functionError;
+        }
+
+        if (data?.tracks && data.tracks.length > 0) {
+          setTracks(data.tracks);
+        } else {
+          setError('No audio files found in the folder');
+        }
+      } catch (err) {
+        console.error('Error fetching tracks:', err);
+        setError('Failed to load tracks from Google Drive');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTracks();
+  }, []);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -71,7 +106,30 @@ export const MusicPlayer = () => {
   };
 
   const track = tracks[currentTrack];
-  const trackUrl = getGoogleDriveStreamUrl(track.googleDriveFileId);
+  const trackUrl = track ? getGoogleDriveStreamUrl(track.googleDriveFileId) : '';
+
+  if (loading) {
+    return (
+      <div className="min-h-screen w-full bg-background flex items-center justify-center p-4">
+        <div className="text-center">
+          <p className="text-muted-foreground">Loading tracks...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || tracks.length === 0) {
+    return (
+      <div className="min-h-screen w-full bg-background flex items-center justify-center p-4">
+        <div className="text-center space-y-2">
+          <p className="text-destructive">{error || 'No tracks available'}</p>
+          <p className="text-sm text-muted-foreground">
+            Make sure your Google Drive folder ID is correct and the folder is public
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full bg-background flex items-center justify-center p-4">

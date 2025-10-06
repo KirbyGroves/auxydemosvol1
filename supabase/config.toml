@@ -1,1 +1,4 @@
 project_id = "rmbnzwobcrkzwnuqdfsb"
+
+[functions.fetch-drive-tracks]
+verify_jwt = false
