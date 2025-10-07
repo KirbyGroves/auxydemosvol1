@@ -18,6 +18,7 @@ export const MusicPlayer = () => {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [useAltSource, setUseAltSource] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // Fetch tracks from Google Drive on component mount
@@ -82,6 +83,10 @@ export const MusicPlayer = () => {
 
     const handleError = (e: Event) => {
       console.error('Audio loading error:', e);
+      if (!useAltSource) {
+        setUseAltSource(true);
+        return; // try alternate source once
+      }
       setError('Failed to load audio file. Please check if the file is accessible.');
       setIsPlaying(false);
     };
@@ -97,15 +102,44 @@ export const MusicPlayer = () => {
       audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
       audio.removeEventListener("error", handleError);
     };
-  }, [currentTrack]);
+  }, [currentTrack, useAltSource]);
 
   useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
     if (isPlaying) {
-      audioRef.current?.play();
+      const playPromise = audio.play();
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch((err) => {
+          console.warn('Playback prevented or failed:', err);
+          setIsPlaying(false);
+        });
+      }
     } else {
-      audioRef.current?.pause();
+      audio.pause();
     }
   }, [isPlaying, currentTrack]);
+
+  const track = tracks[currentTrack];
+  const trackUrl = track
+    ? (useAltSource
+        ? `https://drive.usercontent.google.com/uc?id=${track.googleDriveFileId}&export=download`
+        : getGoogleDriveStreamUrl(track.googleDriveFileId))
+    : '';
+
+  // Reload audio when the track URL changes so metadata can load correctly
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    setError(null);
+    setCurrentTime(0);
+    try {
+      audio.load();
+    } catch (e) {
+      console.warn('Audio reload failed:', e);
+    }
+  }, [trackUrl]);
 
   const togglePlay = () => setIsPlaying(!isPlaying);
 
@@ -131,8 +165,6 @@ export const MusicPlayer = () => {
     }
   };
 
-  const track = tracks[currentTrack];
-  const trackUrl = track ? getGoogleDriveStreamUrl(track.googleDriveFileId) : '';
 
   if (loading) {
     return (
@@ -144,7 +176,7 @@ export const MusicPlayer = () => {
     );
   }
 
-  if (error || tracks.length === 0) {
+  if (tracks.length === 0) {
     return (
       <div className="min-h-screen w-full bg-background flex items-center justify-center p-4">
         <div className="text-center space-y-2">
@@ -165,6 +197,10 @@ export const MusicPlayer = () => {
           <div className="text-sm text-foreground text-center">
             <div className="font-medium">{track.title}</div>
           </div>
+
+          {error && (
+            <div className="text-xs text-destructive text-center">{error}</div>
+          )}
 
           {/* Controls and Progress */}
           <div className="flex items-center gap-3">
@@ -228,7 +264,13 @@ export const MusicPlayer = () => {
         </div>
       </div>
 
-      <audio ref={audioRef} src={trackUrl} />
+      <audio
+        key={track?.id}
+        ref={audioRef}
+        src={trackUrl}
+        preload="metadata"
+        crossOrigin="anonymous"
+      />
     </div>
   );
 };
