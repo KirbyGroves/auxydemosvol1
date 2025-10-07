@@ -2,3 +2,6 @@ project_id = "rmbnzwobcrkzwnuqdfsb"
 
 [functions.fetch-drive-tracks]
 verify_jwt = false
+
+[functions.stream-drive-file]
+verify_jwt = false

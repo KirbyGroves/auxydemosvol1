@@ -4,6 +4,7 @@ import { Slider } from "@/components/ui/slider";
 import { Play, Pause, SkipBack, SkipForward } from "lucide-react";
 import { GOOGLE_DRIVE_FOLDER_ID, Track, getGoogleDriveStreamUrl } from "@/config/tracks";
 import { supabase } from "@/integrations/supabase/client";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
 const formatTime = (seconds: number) => {
   const mins = Math.floor(seconds / 60);
@@ -121,11 +122,15 @@ export const MusicPlayer = () => {
     }
   }, [isPlaying, currentTrack]);
 
+  useEffect(() => {
+    setUseAltSource(false);
+  }, [currentTrack]);
+
   const track = tracks[currentTrack];
   const trackUrl = track
     ? (useAltSource
         ? `https://drive.usercontent.google.com/uc?id=${track.googleDriveFileId}&export=download`
-        : getGoogleDriveStreamUrl(track.googleDriveFileId))
+        : `${SUPABASE_URL}/functions/v1/stream-drive-file?fileId=${track.googleDriveFileId}`)
     : '';
 
   // Reload audio when the track URL changes so metadata can load correctly
