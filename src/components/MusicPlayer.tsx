@@ -64,12 +64,38 @@ export const MusicPlayer = () => {
       }
     };
 
+    const handleLoadedMetadata = () => {
+      // Update track duration with actual audio duration
+      if (audio.duration && isFinite(audio.duration)) {
+        setTracks(prevTracks => {
+          const newTracks = [...prevTracks];
+          if (newTracks[currentTrack]) {
+            newTracks[currentTrack] = {
+              ...newTracks[currentTrack],
+              duration: audio.duration
+            };
+          }
+          return newTracks;
+        });
+      }
+    };
+
+    const handleError = (e: Event) => {
+      console.error('Audio loading error:', e);
+      setError('Failed to load audio file. Please check if the file is accessible.');
+      setIsPlaying(false);
+    };
+
     audio.addEventListener("timeupdate", updateTime);
     audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("error", handleError);
 
     return () => {
       audio.removeEventListener("timeupdate", updateTime);
       audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.removeEventListener("error", handleError);
     };
   }, [currentTrack]);
 
