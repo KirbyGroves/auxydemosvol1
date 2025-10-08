@@ -4,7 +4,6 @@ import { Slider } from "@/components/ui/slider";
 import { Play, Pause, SkipBack, SkipForward } from "lucide-react";
 import { GOOGLE_DRIVE_FOLDER_ID, Track, getGoogleDriveStreamUrl } from "@/config/tracks";
 import { supabase } from "@/integrations/supabase/client";
-import demosIcon from "@/assets/demos-icon.jpg";
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -205,85 +204,75 @@ export const MusicPlayer = () => {
   }
 
   return (
-    <div className="min-h-screen w-full bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl bg-card border border-border rounded-md shadow-sm p-4">
-        <div className="flex items-center gap-4">
-          {/* Icon on the left */}
-          <img 
-            src={demosIcon} 
-            alt="Demos Icon" 
-            className="w-20 h-20 object-contain flex-shrink-0"
-          />
-          
-          {/* Player controls on the right */}
-          <div className="flex-1 space-y-3">
-            {/* Track Info */}
-            <div className="text-sm text-foreground">
-              <div className="font-medium">{track.title}</div>
+    <div className="min-h-screen w-full bg-card flex items-center justify-center p-4">
+      <div className="w-full max-w-xl bg-card p-4">
+        <div className="space-y-3">
+          {/* Track Info - Centered */}
+          <div className="text-sm text-foreground text-center">
+            <div className="font-medium">{track.title}</div>
+          </div>
+
+          {error && (
+            <div className="text-xs text-destructive text-center">{error}</div>
+          )}
+
+          {/* Controls and Progress */}
+          <div className="flex items-center gap-3">
+            {/* Control Buttons */}
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handlePrevious}
+                disabled={currentTrack === 0}
+                className="h-8 w-8"
+              >
+                <SkipBack className="h-4 w-4" />
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={togglePlay}
+                className="h-8 w-8"
+              >
+                {isPlaying ? (
+                  <Pause className="h-4 w-4" />
+                ) : (
+                  <Play className="h-4 w-4" />
+                )}
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleNext}
+                disabled={currentTrack === tracks.length - 1}
+                className="h-8 w-8"
+              >
+                <SkipForward className="h-4 w-4" />
+              </Button>
             </div>
 
-            {error && (
-              <div className="text-xs text-destructive">{error}</div>
-            )}
+            {/* Time Display */}
+            <div className="text-xs text-muted-foreground min-w-[40px]">
+              {formatTime(currentTime)}
+            </div>
 
-            {/* Controls and Progress */}
-            <div className="flex items-center gap-3">
-              {/* Control Buttons */}
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handlePrevious}
-                  disabled={currentTrack === 0}
-                  className="h-8 w-8"
-                >
-                  <SkipBack className="h-4 w-4" />
-                </Button>
+            {/* Progress Bar */}
+            <div className="flex-1">
+              <Slider
+                value={[currentTime]}
+                max={track.duration}
+                step={1}
+                onValueChange={handleSeek}
+                className="cursor-pointer"
+              />
+            </div>
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={togglePlay}
-                  className="h-8 w-8"
-                >
-                  {isPlaying ? (
-                    <Pause className="h-4 w-4" />
-                  ) : (
-                    <Play className="h-4 w-4" />
-                  )}
-                </Button>
-
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleNext}
-                  disabled={currentTrack === tracks.length - 1}
-                  className="h-8 w-8"
-                >
-                  <SkipForward className="h-4 w-4" />
-                </Button>
-              </div>
-
-              {/* Time Display */}
-              <div className="text-xs text-muted-foreground min-w-[40px]">
-                {formatTime(currentTime)}
-              </div>
-
-              {/* Progress Bar */}
-              <div className="flex-1">
-                <Slider
-                  value={[currentTime]}
-                  max={track.duration}
-                  step={1}
-                  onValueChange={handleSeek}
-                  className="cursor-pointer"
-                />
-              </div>
-
-              {/* Duration */}
-              <div className="text-xs text-muted-foreground min-w-[40px] text-right">
-                {formatTime(track.duration || 0)}
-              </div>
+            {/* Duration */}
+            <div className="text-xs text-muted-foreground min-w-[40px] text-right">
+              {formatTime(track.duration || 0)}
             </div>
           </div>
         </div>
