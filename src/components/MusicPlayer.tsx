@@ -1,10 +1,73 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Play, Pause, SkipBack, SkipForward } from "lucide-react";
 import { GOOGLE_DRIVE_FOLDER_ID, Track, getGoogleDriveStreamUrl } from "@/config/tracks";
 import { supabase } from "@/integrations/supabase/client";
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+
+const LOADING_PHRASES = [
+  "Pooping and farting…",
+  "Jukebox time…",
+  "Breeding lice…",
+  "Starting and finishing…",
+  "Loading tracks…",
+  "The smiles lead the way…",
+  "Highlight in Writings…",
+  "Hiring elves…",
+  "Firing gnomes…",
+  "Spinning…",
+  "Creating music…",
+  "Betting everything I have…",
+  "Contributing to society…",
+  "Crossing people who shan't be crossed…",
+  "Describing unsuccessfully...",
+  "Existing…",
+  "Frying butter…",
+  "Golfing with my dad…",
+  "Harvesting twigs and berries…",
+  "Identifying suspects…",
+  "Jumping from 10,000 feet…",
+  "Kicking Doug away to be free…",
+  "Marking Doug with cat urine…",
+  "Saving Doug from vultures…",
+  "Eating Doug…",
+  "Praying to God for my sins…",
+  "Praying to Doug for my sins…",
+  "Learning everything…",
+  "Laughing with real life people…",
+  "Letting blood…",
+  "Loving passionately…",
+  "Mentoring the youth…",
+  "Noticing flowers…",
+  "Offering kind words…",
+  "Apologizing profusely…",
+  "Mispronouncing names…",
+  "Painting pictures of Egypt…",
+  "Performing in front of one hundred people…",
+  "Posting all of your information…",
+  "Pulling hamstrings…",
+  "Questioning everything…",
+  "Raising children for battle…",
+  "Quitting my job…",
+  "Removing stitches myself…",
+  "Saving up money…",
+  "Solving world hunger…",
+  "Solving world peace…",
+  "Solving nonexistent problems…",
+  "Tying square knots…",
+  "Undertaking more than I can handle…",
+  "Valuing life…",
+  "Valuing Love…",
+  "Waiting…",
+  "Waiting while you work it out…",
+  "Yelling at Doug from across the icy desert…",
+  "Zipping pants…",
+  "XYZ…",
+  "Burping and farting…",
+  "Sneezing and burping…",
+  "Spitting up…"
+];
 
 const shuffleArray = <T,>(array: T[]): T[] => {
   const shuffled = [...array];
@@ -30,6 +93,10 @@ export const MusicPlayer = () => {
   const [error, setError] = useState<string | null>(null);
   const [useAltSource, setUseAltSource] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  
+  const loadingPhrase = useMemo(() => {
+    return LOADING_PHRASES[Math.floor(Math.random() * LOADING_PHRASES.length)];
+  }, []);
 
   // Fetch tracks from Google Drive on component mount
   useEffect(() => {
@@ -184,7 +251,7 @@ export const MusicPlayer = () => {
     return (
       <div className="min-h-screen w-full bg-background flex items-center justify-center p-4">
         <div className="text-center">
-          <p className="text-muted-foreground">Loading tracks...</p>
+          <p className="text-muted-foreground">{loadingPhrase}</p>
         </div>
       </div>
     );
