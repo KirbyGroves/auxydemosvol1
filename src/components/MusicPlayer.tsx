@@ -114,7 +114,12 @@ export const MusicPlayer = () => {
         }
 
         if (data?.tracks && data.tracks.length > 0) {
-          setTracks(shuffleArray(data.tracks));
+          // Initialize all tracks with duration 0 until metadata loads
+          const tracksWithZeroDuration = data.tracks.map((track: Track) => ({
+            ...track,
+            duration: 0
+          }));
+          setTracks(shuffleArray(tracksWithZeroDuration));
         } else {
           setError('No audio files found in the folder');
         }
@@ -276,7 +281,7 @@ export const MusicPlayer = () => {
         <div className="space-y-3">
           {/* Track Info - Centered */}
           <div className="text-sm text-foreground text-center">
-            <div className="font-medium">{track.title}</div>
+            <div className="font-bold">{track.title}</div>
           </div>
 
           {error && (
