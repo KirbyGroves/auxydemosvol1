@@ -4,7 +4,17 @@ import { Slider } from "@/components/ui/slider";
 import { Play, Pause, SkipBack, SkipForward } from "lucide-react";
 import { GOOGLE_DRIVE_FOLDER_ID, Track, getGoogleDriveStreamUrl } from "@/config/tracks";
 import { supabase } from "@/integrations/supabase/client";
+import demosIcon from "@/assets/demos-icon.jpg";
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
 
 const formatTime = (seconds: number) => {
   const mins = Math.floor(seconds / 60);
@@ -38,7 +48,7 @@ export const MusicPlayer = () => {
         }
 
         if (data?.tracks && data.tracks.length > 0) {
-          setTracks(data.tracks);
+          setTracks(shuffleArray(data.tracks));
         } else {
           setError('No audio files found in the folder');
         }
@@ -196,7 +206,18 @@ export const MusicPlayer = () => {
 
   return (
     <div className="min-h-screen w-full bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl bg-card border border-border rounded-md shadow-sm p-4">
+      <div className="relative w-full max-w-2xl">
+        {/* Background Icon */}
+        <div className="relative w-full aspect-square">
+          <img 
+            src={demosIcon} 
+            alt="Demos Icon" 
+            className="w-full h-full object-contain"
+          />
+          
+          {/* Music Player positioned over lower 3/20ths */}
+          <div className="absolute bottom-0 left-0 right-0 h-[15%] flex items-center justify-center px-4">
+            <div className="w-full bg-card/95 backdrop-blur-sm border border-border rounded-md shadow-lg p-4">
         <div className="space-y-3">
           {/* Track Info */}
           <div className="text-sm text-foreground text-center">
@@ -263,7 +284,10 @@ export const MusicPlayer = () => {
 
             {/* Duration */}
             <div className="text-xs text-muted-foreground min-w-[40px] text-right">
-              {formatTime(track.duration)}
+              {formatTime(track.duration || 0)}
+            </div>
+          </div>
+        </div>
             </div>
           </div>
         </div>
