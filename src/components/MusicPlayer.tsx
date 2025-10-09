@@ -280,7 +280,7 @@ export const MusicPlayer = () => {
       <div className="w-full max-w-xl bg-card p-4">
         <div className="space-y-3">
           {/* Track Info - Centered */}
-          <div className="text-xl text-foreground text-center tracking-wider">
+          <div className="text-lg text-foreground text-center tracking-wider">
             <div className="font-bold">{track.title}</div>
           </div>
 
