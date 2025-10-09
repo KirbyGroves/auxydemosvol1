@@ -256,7 +256,7 @@ export const MusicPlayer = () => {
     return (
       <div className="min-h-screen w-full bg-background flex items-center justify-center p-4">
         <div className="text-center">
-          <p className="text-muted-foreground">{loadingPhrase}</p>
+          <p className="text-muted-foreground font-['Courier_New',monospace]">{loadingPhrase}</p>
         </div>
       </div>
     );
@@ -280,7 +280,7 @@ export const MusicPlayer = () => {
       <div className="w-full max-w-xl bg-card p-4">
         <div className="space-y-3">
           {/* Track Info - Centered */}
-          <div className="text-sm text-foreground text-center">
+          <div className="text-xl text-foreground text-center tracking-wider">
             <div className="font-bold">{track.title}</div>
           </div>
 
