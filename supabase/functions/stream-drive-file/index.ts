@@ -17,9 +17,10 @@ serve(async (req) => {
     const url = new URL(req.url);
     const fileId = url.searchParams.get("fileId");
 
-    if (!fileId) {
+    // Validate fileId format (Google Drive file IDs are typically 20-50 chars, alphanumeric with hyphens/underscores)
+    if (!fileId || !/^[a-zA-Z0-9_-]{20,50}$/.test(fileId)) {
       return new Response(
-        JSON.stringify({ error: "fileId is required" }),
+        JSON.stringify({ error: "Invalid or missing file ID" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -51,8 +52,8 @@ serve(async (req) => {
       const text = await driveResp.text().catch(() => "");
       console.error("Drive stream error", driveResp.status, text);
       return new Response(
-        JSON.stringify({ error: "Failed to stream file from Google Drive", status: driveResp.status, details: text }),
-        { status: driveResp.status || 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Unable to stream file at this time" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 

@@ -35,6 +35,14 @@ serve(async (req) => {
       );
     }
 
+    // Validate folder ID format (Google Drive IDs are alphanumeric with hyphens/underscores)
+    if (!/^[a-zA-Z0-9_-]+$/.test(folderId)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid folder ID format' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const apiKey = Deno.env.get('GOOGLE_DRIVE_API_KEY');
     
     if (!apiKey) {
@@ -47,9 +55,10 @@ serve(async (req) => {
 
     console.log('Fetching files from folder:', folderId);
 
-    // Fetch files from Google Drive folder
+    // Fetch files from Google Drive folder with proper URL encoding
+    const query = encodeURIComponent(`'${folderId}' in parents and mimeType contains 'audio'`);
     const response = await fetch(
-      `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType+contains+'audio'&key=${apiKey}&fields=files(id,name,mimeType)`,
+      `https://www.googleapis.com/drive/v3/files?q=${query}&key=${apiKey}&fields=files(id,name,mimeType)`,
       {
         method: 'GET',
         headers: {
@@ -60,10 +69,10 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Google Drive API error:', errorText);
+      console.error('Google Drive API error:', response.status, errorText);
       return new Response(
-        JSON.stringify({ error: 'Failed to fetch files from Google Drive', details: errorText }),
-        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Unable to fetch tracks at this time' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
