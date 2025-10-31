@@ -44,6 +44,7 @@ serve(async (req) => {
       method: "GET",
       headers: {
         Accept: "*/*",
+        Referer: "https://lovableproject.com",
         ...(range ? { Range: range } : {}),
       },
     });

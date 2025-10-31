@@ -63,6 +63,7 @@ serve(async (req) => {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
+          'Referer': 'https://lovableproject.com',
         },
       }
     );
@@ -70,6 +71,19 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Google Drive API error:', response.status, errorText);
+      
+      // Check for API key referrer restriction error
+      if (response.status === 403 && errorText.includes('API_KEY_HTTP_REFERRER_BLOCKED')) {
+        console.error('API Key Configuration Issue: The Google Drive API key has HTTP referrer restrictions. Please configure the API key in Google Cloud Console to allow requests from server-side applications (remove referrer restrictions or allow empty referrers).');
+        return new Response(
+          JSON.stringify({ 
+            error: 'API configuration error. Please check that your Google Drive API key allows server-side requests.',
+            hint: 'Visit Google Cloud Console > APIs & Services > Credentials to configure your API key restrictions'
+          }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
       return new Response(
         JSON.stringify({ error: 'Unable to fetch tracks at this time' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
