@@ -93,6 +93,7 @@ export const MusicPlayer = () => {
   const [error, setError] = useState<string | null>(null);
   const [useAltSource, setUseAltSource] = useState(false);
   const [metadataLoaded, setMetadataLoaded] = useState(false);
+  const [isSeeking, setIsSeeking] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   
   const loadingPhrase = useMemo(() => {
@@ -139,7 +140,11 @@ export const MusicPlayer = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const updateTime = () => setCurrentTime(audio.currentTime);
+    const updateTime = () => {
+      if (!isSeeking) {
+        setCurrentTime(audio.currentTime);
+      }
+    };
     const handleEnded = () => {
       if (currentTrack < tracks.length - 1) {
         setCurrentTrack(currentTrack + 1);
@@ -191,7 +196,7 @@ export const MusicPlayer = () => {
       audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
       audio.removeEventListener("error", handleError);
     };
-  }, [currentTrack, useAltSource, tracks]);
+  }, [currentTrack, useAltSource, tracks, isSeeking]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -248,9 +253,15 @@ export const MusicPlayer = () => {
   const handleSeek = (value: number[]) => {
     const time = value[0];
     setCurrentTime(time);
+    setIsSeeking(true);
+  };
+
+  const handleSeekCommit = (value: number[]) => {
+    const time = value[0];
     if (audioRef.current) {
       audioRef.current.currentTime = time;
     }
+    setIsSeeking(false);
   };
 
 
@@ -341,6 +352,7 @@ export const MusicPlayer = () => {
                 max={track.duration || 1}
                 step={1}
                 onValueChange={handleSeek}
+                onValueCommit={handleSeekCommit}
                 disabled={!metadataLoaded}
                 className="cursor-pointer"
               />
