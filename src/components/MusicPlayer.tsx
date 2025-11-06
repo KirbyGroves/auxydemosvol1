@@ -180,13 +180,18 @@ export const MusicPlayer = () => {
     audio.addEventListener("loadedmetadata", handleLoadedMetadata);
     audio.addEventListener("error", handleError);
 
+    // If metadata already loaded before listeners attached
+    if (audio.readyState >= 1) {
+      handleLoadedMetadata();
+    }
+
     return () => {
       audio.removeEventListener("timeupdate", updateTime);
       audio.removeEventListener("ended", handleEnded);
       audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
       audio.removeEventListener("error", handleError);
     };
-  }, [currentTrack, useAltSource]);
+  }, [currentTrack, useAltSource, tracks]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -221,6 +226,7 @@ export const MusicPlayer = () => {
   useEffect(() => {
     setError(null);
     setCurrentTime(0);
+    setMetadataLoaded(false);
   }, [trackUrl]);
 
   const togglePlay = () => setIsPlaying(!isPlaying);
