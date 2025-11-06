@@ -217,17 +217,10 @@ export const MusicPlayer = () => {
         : `${SUPABASE_URL}/functions/v1/stream-drive-file?fileId=${track.googleDriveFileId}`)
     : '';
 
-  // Reload audio when the track URL changes so metadata can load correctly
+  // Reset state when track URL changes
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
     setError(null);
     setCurrentTime(0);
-    try {
-      audio.load();
-    } catch (e) {
-      console.warn('Audio reload failed:', e);
-    }
   }, [trackUrl]);
 
   const togglePlay = () => setIsPlaying(!isPlaying);
