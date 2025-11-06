@@ -92,6 +92,7 @@ export const MusicPlayer = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [useAltSource, setUseAltSource] = useState(false);
+  const [metadataLoaded, setMetadataLoaded] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   
   const loadingPhrase = useMemo(() => {
@@ -161,6 +162,7 @@ export const MusicPlayer = () => {
           return newTracks;
         });
       }
+      setMetadataLoaded(true);
     };
 
     const handleError = (e: Event) => {
@@ -205,6 +207,7 @@ export const MusicPlayer = () => {
 
   useEffect(() => {
     setUseAltSource(false);
+    setMetadataLoaded(false);
   }, [currentTrack]);
 
   const track = tracks[currentTrack];
@@ -306,6 +309,7 @@ export const MusicPlayer = () => {
                 variant="ghost"
                 size="icon"
                 onClick={togglePlay}
+                disabled={!metadataLoaded}
                 className="h-8 w-8"
               >
                 {isPlaying ? (
@@ -335,16 +339,17 @@ export const MusicPlayer = () => {
             <div className="flex-1">
               <Slider
                 value={[currentTime]}
-                max={track.duration}
+                max={track.duration || 1}
                 step={1}
                 onValueChange={handleSeek}
+                disabled={!metadataLoaded}
                 className="cursor-pointer"
               />
             </div>
 
             {/* Duration */}
             <div className="text-xs text-muted-foreground min-w-[40px] text-right">
-              {formatTime(track.duration || 0)}
+              {metadataLoaded ? formatTime(track.duration || 0) : '...'}
             </div>
           </div>
         </div>
